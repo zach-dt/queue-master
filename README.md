@@ -17,6 +17,12 @@ unit.py`
 
 # Build
 
+## Java
+
+`mvn -DskipTests package`
+
+# Docker
+
 `GROUP=weaveworksdemos COMMIT=test ./scripts/build.sh`
 
 # Push
