@@ -56,10 +56,12 @@ pipeline {
             }
           }
           container('maven') {
-            sh 'mvn clean deploy'
+            sh "mvn -DskipTests package"  
+            sh "cp ./target/*.jar ./docker/queue-master"
+            sh "docker build -t $DOCKER_REGISTRY/$ORG/$APP_NAME:\$(cat VERSION) -f ./docker/queue-master/Dockerfile ./docker/queue-master"
+            sh "docker push $DOCKER_REGISTRY/$ORG/$APP_NAME:\$(cat VERSION)"
 
-            sh 'export VERSION=`cat VERSION` && skaffold build -f skaffold.yaml'
-
+            //sh 'export VERSION=`cat VERSION` && skaffold build -f skaffold.yaml'
 
             sh "jx step post build --image $DOCKER_REGISTRY/$ORG/$APP_NAME:\$(cat VERSION)"
           }
