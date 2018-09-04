@@ -1,10 +1,10 @@
 ---
 applications:
-- name: queue-master
+- name: APPNAME
   memory: 1G
   instances: 1
   docker:
-    image: DOCKER-HUB-ACCOUNT/queue-master
+    image: DOCKER_HUB_ACCOUNT/queue-master
   env:
     DT_NODE_ID: APPNAME
     DT_CUSTOM_PROP: DEPLOYMENT_GRP_NAME=DTGRP DEPLOYMENT_COLOR=APPCOLOR
