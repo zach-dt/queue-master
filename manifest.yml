@@ -3,5 +3,4 @@ applications:
 - name: queue-master
   memory: 1G
   instances: 1
-  docker:
-    image: jbraeuer/queue-master
+  buildpack: java_buildpack_offline
