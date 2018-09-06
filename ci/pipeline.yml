@@ -4,6 +4,12 @@ groups:
   jobs:
   - build-queue-master
   - deploy-queue-master-to-stage
+  - build-queue-master-test-image
+  - execute-queue-master-functional-tests
+  - deploy-queue-master-to-prod
+  - execute-queue-master-load-tests
+  - validate-queue-master-load-test
+  - promote-new-version-queue-master
 
 - name: init-dynatrace
   jobs: 
