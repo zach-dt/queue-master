@@ -21,13 +21,13 @@ resources:
   type: git
   source:
     branch: master
-    uri: https://github.com/acm-workshop/sockshop.git
+    uri: https://github.com/acm-workshop-concourse/sockshop.git
 
 - name: git-queue-master
   type: git
   source:
     branch: master
-    uri: https://github.com/acm-workshop/queue-master.git
+    uri: https://github.com/acm-workshop-concourse/queue-master.git
 
 - name: dynatrace
   type: dynatrace-resource
