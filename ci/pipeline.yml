@@ -109,7 +109,7 @@ jobs:
       platform: linux
       image_resource:
         type: docker-image
-        source: {repository: busybox}
+        source: {repository: maven, tag: 3.2-jdk-8}
       inputs:
       - name: git-queue-master
       outputs:
