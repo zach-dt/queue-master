@@ -4,6 +4,12 @@ groups:
   jobs:
   - build-queue-master
   - deploy-queue-master-to-stage
+  - build-queue-master-test-image
+  - execute-queue-master-functional-tests
+  - deploy-queue-master-to-prod
+  - execute-queue-master-load-tests
+  - validate-queue-master-load-test
+  - promote-new-version-queue-master
 
 - name: init-dynatrace
   jobs: 
@@ -21,27 +27,30 @@ resources:
   type: git
   source:
     branch: master
-    uri: https://github.com/acm-workshop/sockshop.git
+    uri: https://github.com/acm-workshop-concourse/sockshop.git
 
 - name: git-queue-master
   type: git
   source:
     branch: master
-    uri: https://github.com/acm-workshop/queue-master.git
+    uri: https://github.com/acm-workshop-concourse/queue-master.git
 
 - name: dynatrace
   type: dynatrace-resource
   source:
     apitoken: ((apitoken))
     tenanthost: ((tenanthost))
-# Docker Images
 
-- name: queue-master-image
-  type: docker-image
+- name: queue-master-release-bucket
+  type: s3
   source:
-    repository: ((docker-hub-username))/queue-master
-    username: ((docker-hub-username))
-    password: ((docker-hub-password))
+    region_name: eu-west-1
+    versioned_file: queue-master/queue-master.jar
+    bucket: orders-release-bucket
+    access_key_id: ((s3-access-key-id))
+    secret_access_key: ((s3-secret-access-key))
+
+# Docker Images
 
 - name: queue-master-test-image
   type: docker-image
@@ -95,12 +104,12 @@ jobs:
   plan:
   - get: git-queue-master
     trigger: true
-  - task: copy-dockerfile
+  - task: mvn-build
     config:
       platform: linux
       image_resource:
         type: docker-image
-        source: {repository: busybox}
+        source: {repository: maven, tag: 3.2-jdk-8}
       inputs:
       - name: git-queue-master
       outputs:
@@ -111,13 +120,13 @@ jobs:
         - -exc
         - |
           output_dir=workspace
-          rm git-queue-master/Dockerfile
-          cp git-queue-master/docker/queue-master/Dockerfile git-queue-master/
-          cp -R git-queue-master/. "${output_dir}/"
-  - put: queue-master-image
+          cd git-queue-master
+          mvn -DskipTests package
+          cd ..
+          cp git-queue-master/target/*.jar "${output_dir}/"
+  - put: queue-master-release-bucket
     params:
-      build: workspace
-      cache_tag: latest
+      file: workspace/queue-master.jar
 
 - name: build-queue-master-test-image
   serial: true
@@ -137,6 +146,9 @@ jobs:
     trigger: true
     passed:
       - build-queue-master
+  - get: queue-master-release-bucket
+    passed:
+      - build-queue-master
   - get: git-pipeline
     trigger: false      
   - task: prepare-app-manifest
@@ -153,7 +165,8 @@ jobs:
       APP_REPO: git-queue-master 
   - put: pcf-stage
     params:
-      manifest: app-manifest-output/manifest.yml  
+      path: queue-master-release-bucket/queue-master.jar
+      manifest: app-manifest-output/manifest.yml 
   
 - name: execute-queue-master-functional-tests
   serial: true
@@ -187,7 +200,10 @@ jobs:
   - get: git-queue-master
     trigger: true
     passed:
-      - execute-queue-master-functional-tests 
+      - execute-queue-master-functional-tests
+  - get: queue-master-release-bucket
+    passed:
+      - build-queue-master 
   - get: git-pipeline
     trigger: false
   - task: get-current-app-color
@@ -214,7 +230,8 @@ jobs:
       APP_REPO: git-queue-master      
   - put: pcf-production
     params:
-        manifest: app-manifest-output/manifest.yml 
+      path: queue-master-release-bucket/queue-master.jar
+      manifest: app-manifest-output/manifest.yml 
 
 - name: execute-queue-master-load-tests
   serial: true
