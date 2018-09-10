@@ -1,6 +1,9 @@
 # Settings
 *.settings
 
+# Credentials
+credentials.yml
+
 # Logs
 logs
 *.log

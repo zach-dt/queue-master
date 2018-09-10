@@ -10,9 +10,9 @@ echo $CODE_DIR
 
 cp $CODE_DIR/target/*.jar $CODE_DIR/docker/$(basename $CODE_DIR)
 
-for m in ./docker/*/; do
-    REPO=${GROUP}/$(basename $m)
-    docker build -t jbraeuer/queue-master:latest $CODE_DIR/$m;
-done;
+#for m in ./docker/*/; do
+#    REPO=${GROUP}/$(basename $m)
+#   docker build -t jbraeuer/queue-master:latest $CODE_DIR/$m;
+#done;
 
-docker push jbraeuer/queue-master:latest
+# docker push jbraeuer/queue-master:latest
