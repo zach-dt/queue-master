@@ -4,8 +4,7 @@ groups:
   jobs:
   - build-queue-master
   - deploy-queue-master-to-stage
-  - build-queue-master-test-image
-  - execute-queue-master-functional-tests
+  - health-check
   - deploy-queue-master-to-prod
   - execute-queue-master-load-tests
   - validate-queue-master-load-test
@@ -22,12 +21,18 @@ resource_types:
     repository: mvilliger/dynatrace-resource
 
 resources:
-# GitHub Repositories
+
 - name: git-pipeline
   type: git
   source:
     branch: master
     uri: https://github.com/acm-workshop-concourse/sockshop.git
+
+- name: git-jmeter-as-container
+  type: git
+  source:
+    branch: master
+    uri: https://github.com/acm-workshop/jmeter-as-container.git
 
 - name: git-queue-master
   type: git
@@ -49,15 +54,6 @@ resources:
     bucket: orders-release-bucket
     access_key_id: ((s3-access-key-id))
     secret_access_key: ((s3-secret-access-key))
-
-# Docker Images
-
-- name: queue-master-test-image
-  type: docker-image
-  source:
-    repository: ((docker-hub-username))/queue-master-test
-    username: ((docker-hub-username))
-    password: ((docker-hub-password))
 
 # PCF Environments
 
@@ -98,7 +94,7 @@ jobs:
       tenanthost: ((tenanthost))
       APP_REPO: git-queue-master
 
-# queue-master
+# QUEUE-MASTER
 
 - name: build-queue-master
   plan:
@@ -127,16 +123,6 @@ jobs:
   - put: queue-master-release-bucket
     params:
       file: workspace/queue-master.jar
-
-- name: build-queue-master-test-image
-  serial: true
-  public: true
-  plan:
-  - get: git-queue-master
-  - put: queue-master-test-image
-    params:
-      build: git-queue-master
-      cache_tag: latest
 
 - name: deploy-queue-master-to-stage
   serial: true
@@ -168,7 +154,7 @@ jobs:
       path: queue-master-release-bucket/queue-master.jar
       manifest: app-manifest-output/manifest.yml 
   
-- name: execute-queue-master-functional-tests
+- name: health-check
   serial: true
   public: true
   plan:
@@ -177,22 +163,21 @@ jobs:
       trigger: true
       passed:
         - deploy-queue-master-to-stage
-    - get: queue-master-test-image
-      passed:
-        - build-queue-master-test-image
-  - task: run-functional-tests
-    image: queue-master-test-image
-    config:
-      platform: linux
-      inputs:
-      - name: git-queue-master
-      run:
-        dir: git-queue-master
-        path: /bin/sh
-        args:
-        - -c
-        - |
-          go test api/endpoints_test.go
+    - get: git-jmeter-as-container
+    - get: git-pipeline
+  - task: run-load-tests
+    file: git-pipeline/deploy/cloud-foundry/ci/tasks/health-test.yml
+    params:
+      APP_REPO: git-jmeter-as-container
+      FUNC_VALIDATION: yes
+      PRODUCTION: false
+      SCRIPT_NAME: basiccheck.jmx
+      PCF_APP_SUFFIX: ((pcf-stage-queue-master-suffix))
+      PCF_APP_DOMAIN: ((pcf-prod-app-domain))
+      DT_LTN: HealthCheck
+      VUCount: 1
+      LoopCount: 1
+
 - name: deploy-queue-master-to-prod
   serial: true
   public: true
@@ -200,7 +185,7 @@ jobs:
   - get: git-queue-master
     trigger: true
     passed:
-      - execute-queue-master-functional-tests
+      - health-check
   - get: queue-master-release-bucket
     passed:
       - build-queue-master 
@@ -242,9 +227,6 @@ jobs:
       trigger: true
       passed:
         - deploy-queue-master-to-prod
-    - get: queue-master-test-image
-      passed:
-        - build-queue-master-test-image
     - get: git-pipeline
       trigger: false        
   - task: get-current-app-color
