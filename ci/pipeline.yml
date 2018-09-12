@@ -50,10 +50,21 @@ resources:
   type: s3
   source:
     region_name: eu-west-1
-    versioned_file: queue-master/queue-master.jar
-    bucket: orders-release-bucket
+    regexp: queue-master/queue-master-(.*).jar
+    bucket: ((s3-bucket))
     access_key_id: ((s3-access-key-id))
     secret_access_key: ((s3-secret-access-key))
+
+- name: version
+  type: semver
+  source:
+    driver: s3
+    initial_version: 0.0.1
+    region_name: eu-west-1
+    bucket: ((s3-bucket))
+    access_key_id: ((s3-access-key-id))
+    secret_access_key: ((s3-secret-access-key))
+    key: queue-master/version
 
 # PCF Environments
 
@@ -86,7 +97,7 @@ jobs:
   plan:
   - aggregate:
     - get: git-pipeline
-    - get: git-queue-master 
+    - get: git-queue-master
   - task: init-dynatrace-task
     file: git-pipeline/deploy/cloud-foundry/ci/tasks/init-dynatrace-task.yml
     params: 
@@ -100,6 +111,8 @@ jobs:
   plan:
   - get: git-queue-master
     trigger: true
+  - get: version
+    params: { bump: patch }
   - task: mvn-build
     config:
       platform: linux
@@ -108,6 +121,7 @@ jobs:
         source: {repository: maven, tag: 3.2-jdk-8}
       inputs:
       - name: git-queue-master
+      - name: version
       outputs:
       - name: workspace
       run:
@@ -119,10 +133,11 @@ jobs:
           cd git-queue-master
           mvn -DskipTests package
           cd ..
-          cp git-queue-master/target/*.jar "${output_dir}/"
+          mv git-queue-master/target/queue-master.jar git-queue-master/target/queue-master-$(cat version/number).jar
+          cp git-queue-master/target/queue-master-*.jar "${output_dir}/"
   - put: queue-master-release-bucket
     params:
-      file: workspace/queue-master.jar
+      file: workspace/queue-master-*.jar
 
 - name: deploy-queue-master-to-stage
   serial: true
@@ -151,7 +166,7 @@ jobs:
       APP_REPO: git-queue-master 
   - put: pcf-stage
     params:
-      path: queue-master-release-bucket/queue-master.jar
+      path: queue-master-release-bucket/queue-master-*.jar
       manifest: app-manifest-output/manifest.yml 
   
 - name: health-check
@@ -215,7 +230,7 @@ jobs:
       APP_REPO: git-queue-master      
   - put: pcf-production
     params:
-      path: queue-master-release-bucket/queue-master.jar
+      path: queue-master-release-bucket/queue-master-*.jar
       manifest: app-manifest-output/manifest.yml 
 
 - name: execute-queue-master-load-tests
@@ -280,7 +295,6 @@ jobs:
       tenanthost: ((tenanthost))
       APP_REPO: git-queue-master     
 
-
 - name: promote-new-version-queue-master
   serial: true
   public: true
@@ -289,6 +303,8 @@ jobs:
     trigger: true
     passed:
       - validate-queue-master-load-test
+  - get: version
+    params: { bump: patch }
   - get: git-pipeline
     trigger: false      
   - task: get-current-app-color
@@ -310,3 +326,5 @@ jobs:
       PCF_PWD: ((pcf-prod-deploy-password))
       PCF_SPACE: ((pcf-prod-space))
       PCF_APP_DOMAIN: ((pcf-prod-app-domain))              
+  - put: version
+    params: { file: version/number }
