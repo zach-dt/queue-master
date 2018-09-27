@@ -38,3 +38,6 @@ This service will shortly be redesigned.
   a better demonstration on Scope.
 - Read object from queue and provide feedback on status
 - See microservices-demo/orders and microservices-demo/shipping
+
+
+
