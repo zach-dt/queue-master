@@ -126,7 +126,7 @@ jobs:
   - get: git-queue-master
     trigger: true
   - get: version
-    params: { pre: rc }
+    params: { pre: build }
   - task: mvn-build
     config:
       platform: linux
