@@ -3,7 +3,7 @@ pipeline {
     label 'maven'
   }
   environment {
-    APP_NAME = "orders"
+    APP_NAME = "queue-master"
     ARTEFACT_ID = "sockshop/" + "${env.APP_NAME}"
     VERSION = readFile 'version'
     TAG = "10.31.240.247:5000/library/${env.ARTEFACT_ID}"
@@ -54,7 +54,7 @@ pipeline {
       }
       steps {
         container('kubectl') {
-          sh "kubectl -n dev apply -f manifest/orders.yml"
+          sh "kubectl -n dev apply -f manifest/queue-master.yml"
         }
       }
     }
