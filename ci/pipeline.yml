@@ -282,7 +282,7 @@ jobs:
       APP_REPO: git-jmeter-as-container
       FUNC_VALIDATION: yes
       PRODUCTION: true
-      SCRIPT_NAME: queue_master.jmx
+      SCRIPT_NAME: queue-master_load.jmx
       PCF_APP_SUFFIX: ((pcf-prod-queue-master-suffix))
       PCF_APP_DOMAIN: ((pcf-prod-app-domain))
       DT_LTN: LoadTest
