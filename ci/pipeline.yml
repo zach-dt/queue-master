@@ -17,11 +17,11 @@ groups:
   jobs: 
   - init-dynatrace-queue-master
 
-# resource_types:
-# - name: dynatrace-resource
-#   type: docker-image
-#   source:
-#     repository: mvilliger/dynatrace-resource
+resource_types:
+- name: dynatrace-resource
+  type: docker-image
+  source:
+    repository: mvilliger/dynatrace-resource
 
 resources:
 
@@ -46,11 +46,11 @@ resources:
     branch: master
     uri: https://github.com/((workshop-repository))/queue-master.git
 
-# - name: dynatrace
-#   type: dynatrace-resource
-#   source:
-#     apitoken: ((apitoken))
-#     tenanthost: ((tenanthost))
+- name: dynatrace
+  type: dynatrace-resource
+  source:
+    apitoken: ((dt_api_token))
+    tenanthost: ((dt_tenant_host))
 
 - name: queue-master-release-bucket
   type: s3
@@ -178,11 +178,12 @@ jobs:
   - task: prepare-app-manifest
     file: git-pipeline/deploy/cloud-foundry/ci/tasks/app-manifest-prep.yml
     params:
+      STAGE: Dev
       PCF_APP_SUFFIX: ((pcf-dev-queue-master-suffix)) 
       APP_REPO: git-queue-master           
   # - put: dynatrace
   #   params:
-  #     monspecserviceenvironment: queue-master/dev
+  #     monspecserviceenvironment: queue-master/Dev
   #     pipelinetaskname: deploy-to-dev
   #     deployversion: v1.0
   #     APP_REPO: git-queue-master
@@ -263,14 +264,15 @@ jobs:
   - task: prepare-app-manifest
     file: git-pipeline/deploy/cloud-foundry/ci/tasks/app-manifest-prep.yml
     params:
+      STAGE: Staging
       PCF_APP_SUFFIX: ((pcf-staging-queue-master-suffix)) 
       APP_REPO: git-queue-master               
-  # - put: dynatrace
-  #   params:
-  #     monspecserviceenvironment: queue-master/Production
-  #     pipelinetaskname: deploy-to-prod
-  #     deployversion: v1.0 
-  #     APP_REPO: git-queue-master 
+  - put: dynatrace
+    params:
+      monspecserviceenvironment: queue-master/Staging
+      pipelinetaskname: deploy-to-staging
+      deployversion: v1.0 
+      APP_REPO: git-queue-master 
   - put: pcf-staging
     params:
       path: queue-master-release-bucket/queue-master-*.jar
@@ -333,7 +335,6 @@ jobs:
 #       tenanthost: ((tenanthost))
 #       APP_REPO: git-queue-master     
 
-
 - name: deploy-to-production
   serial: true
   public: true
@@ -359,15 +360,15 @@ jobs:
   - task: prepare-app-manifest
     file: git-pipeline/deploy/cloud-foundry/ci/tasks/app-manifest-prep.yml
     params:
+      STAGE: Production 
       PCF_APP_SUFFIX: ((pcf-production-queue-master-suffix)) 
-      APP_REPO: git-queue-master
-      PRODUCTION: true                 
-  # - put: dynatrace
-  #   params:
-  #     monspecserviceenvironment: queue-master/Production
-  #     pipelinetaskname: deploy-queue-master-to-prod
-  #     deployversion: v1.0 
-  #     APP_REPO: git-queue-master 
+      APP_REPO: git-queue-master                
+  - put: dynatrace
+    params:
+      monspecserviceenvironment: queue-master/Production
+      pipelinetaskname: deploy-to-production
+      deployversion: v1.0 
+      APP_REPO: git-queue-master 
   - put: pcf-production
     params:
       path: queue-master-release-bucket/queue-master-*.jar
