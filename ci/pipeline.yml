@@ -55,7 +55,7 @@ resources:
   type: dynatrace-resource
   source:
     apitoken: ((dt_api_token))
-    tenanthost: ((dt_tenant_url))
+    tenanthost: ((dt_tenant_host))
 
 - name: queue-master-release-bucket
   type: s3
@@ -120,7 +120,7 @@ jobs:
     file: git-pipeline/deploy/cloud-foundry/ci/tasks/init-dynatrace-task.yml
     params: 
       apitoken: ((dt_api_token))
-      tenanthost: ((dt_tenant_url))
+      tenanthost: ((dt_tenant_host))
       APP_REPO: git-queue-master
 
 # QUEUE-MASTER
@@ -310,7 +310,7 @@ jobs:
 #     params: 
 #       monspecserviceenvironment: queue-master/Production-$NEXT_APP_COLOR
 #       apitoken: ((dt_api_token))
-#       tenanthost: ((dt_tenant_url))
+#       tenanthost: ((dt_tenant_host))
 #       APP_REPO: git-queue-master 
 
 # - name: validate-test-result
@@ -337,7 +337,7 @@ jobs:
 #     params: 
 #       monspeccomparison: queue-master/Production-$NEXT_APP_COLOR\ToProduction-$CURRENT_APP_COLOR\Last5m
 #       apitoken: ((dt_api_token))
-#       tenanthost: ((dt_tenant_url))
+#       tenanthost: ((dt_tenant_host))
 #       APP_REPO: git-queue-master     
 
 - name: deploy-to-production
@@ -463,7 +463,7 @@ jobs:
     params: 
       monspecserviceenvironment: queue-master/Dev
       apitoken: ((dt_api_token))
-      tenanthost: ((dt_tenant_url))
+      tenanthost: ((dt_tenant_host))
       APP_REPO: git-queue-master 
 
 - name: validate-performance-check
@@ -481,5 +481,5 @@ jobs:
     params: 
       monspeccomparison: queue-master/DevToDevLastHour
       apitoken: ((dt_api_token))
-      tenanthost: ((dt_tenant_url))
+      tenanthost: ((dt_tenant_host))
       APP_REPO: git-queue-master
