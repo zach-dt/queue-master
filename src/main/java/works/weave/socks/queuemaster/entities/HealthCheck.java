@@ -27,10 +27,10 @@ public class HealthCheck {
    @Override
    public String toString() {
       return "HealthCheck{" +
-               "service='" + service + '\'' +
-               ", status='" + status + '\'' +
-               ", date='" + date +
-               '}';
+        "service='" + service + '\'' +
+        ", status='" + status + '\'' +
+        ", date='" + date +
+        '}';
    }
 
    public String getService() {

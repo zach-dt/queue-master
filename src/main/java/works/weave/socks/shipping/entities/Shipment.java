@@ -22,9 +22,9 @@ public class Shipment {
 	@Override
 	public String toString() {
 		return "Shipment{" +
-				"id='" + id + '\'' +
-				", name='" + name + '\'' +
-				'}';
+			"id='" + id + '\'' +
+			", name='" + name + '\'' +
+			'}';
 	}
 
 	@Override
@@ -35,7 +35,6 @@ public class Shipment {
 		Shipment shipment = (Shipment) o;
 
 		return getId() != null ? getId().equals(shipment.getId()) : shipment.getId() == null;
-
 	}
 
 	@Override

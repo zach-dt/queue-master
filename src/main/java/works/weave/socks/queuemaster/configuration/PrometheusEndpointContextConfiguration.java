@@ -1,5 +1,6 @@
 package works.weave.socks.queuemaster.configuration;
 
+/*
 import io.prometheus.client.CollectorRegistry;
 import org.springframework.boot.actuate.autoconfigure.ExportMetricWriter;
 import org.springframework.boot.actuate.autoconfigure.ManagementContextConfiguration;
@@ -36,5 +37,5 @@ public class PrometheusEndpointContextConfiguration {
     MetricWriter prometheusMetricWriter(CollectorRegistry registry) {
         return new PrometheusMetricWriter(registry);
     }
-
 }
+*/

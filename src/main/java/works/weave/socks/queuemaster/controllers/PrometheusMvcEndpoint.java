@@ -1,5 +1,6 @@
 package works.weave.socks.queuemaster.controllers;
 
+/*
 import io.prometheus.client.exporter.common.TextFormat;
 import org.springframework.boot.actuate.endpoint.mvc.AbstractEndpointMvcAdapter;
 import org.springframework.boot.actuate.endpoint.mvc.HypermediaDisabled;
@@ -23,9 +24,10 @@ public class PrometheusMvcEndpoint extends AbstractEndpointMvcAdapter<Prometheus
     protected Object invoke() {
         if (!getDelegate().isEnabled()) {
             return new ResponseEntity<>(
-                    Collections.singletonMap("message", "This endpoint is disabled"),
-                    HttpStatus.NOT_FOUND);
+                Collections.singletonMap("message", "This endpoint is disabled"),
+                HttpStatus.NOT_FOUND);
         }
         return super.invoke();
     }
 }
+*/

@@ -1,5 +1,6 @@
 package works.weave.socks.queuemaster.monitoring;
 
+/*
 import io.prometheus.client.CollectorRegistry;
 import io.prometheus.client.Counter;
 import io.prometheus.client.Gauge;
@@ -50,5 +51,5 @@ public class PrometheusMetricWriter implements MetricWriter {
     private String sanitizeName(String name) {
         return name.replaceAll("[^a-zA-Z0-9_]", "_");
     }
-
 }
+*/

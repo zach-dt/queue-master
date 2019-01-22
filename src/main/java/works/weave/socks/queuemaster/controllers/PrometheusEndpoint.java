@@ -1,5 +1,6 @@
 package works.weave.socks.queuemaster.controllers;
 
+/*
 import io.prometheus.client.CollectorRegistry;
 import io.prometheus.client.exporter.common.TextFormat;
 import org.springframework.boot.actuate.endpoint.AbstractEndpoint;
@@ -28,3 +29,4 @@ public class PrometheusEndpoint extends AbstractEndpoint<String> {
         return writer.toString();
     }
 }
+*/

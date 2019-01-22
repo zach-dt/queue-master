@@ -13,16 +13,14 @@ import org.springframework.context.annotation.Configuration;
 import works.weave.socks.shipping.entities.Shipment;
 
 @Configuration
-public class RabbitMqConfiguration
-{
+public class RabbitMqConfiguration {
     final static String queueName = "shipping-task";
 
     @Value("${spring.rabbitmq.host}")
     private String host;
 
     @Bean
-    public ConnectionFactory connectionFactory()
-    {
+    public ConnectionFactory connectionFactory() {
         CachingConnectionFactory connectionFactory = new CachingConnectionFactory(host);
         connectionFactory.setCloseTimeout(5000);
         connectionFactory.setConnectionTimeout(5000);
@@ -32,22 +30,19 @@ public class RabbitMqConfiguration
     }
 
     @Bean
-    public AmqpAdmin amqpAdmin()
-    {
+    public AmqpAdmin amqpAdmin() {
         return new RabbitAdmin(connectionFactory());
     }
 
     @Bean
-    public MessageConverter jsonMessageConverter()
-    {
+    public MessageConverter jsonMessageConverter() {
         final Jackson2JsonMessageConverter converter = new Jackson2JsonMessageConverter();
         converter.setClassMapper(classMapper());
         return converter;
     }
 
     @Bean
-    public DefaultClassMapper classMapper()
-    {
+    public DefaultClassMapper classMapper() {
         DefaultClassMapper typeMapper = new DefaultClassMapper();
         typeMapper.setDefaultType(Shipment.class);
         return typeMapper;
